@@ -62,7 +62,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="bg-background dark:bg-card rounded-lg p-1.5">
-              <img src={back2meLogo} alt="Back2Me Logo" className="h-12 w-auto transition-transform group-hover:scale-105" />
+              <img src={back2meLogo} alt="Back2Me Logo" className="h-16 w-auto transition-transform group-hover:scale-105" />
             </div>
           </Link>
 

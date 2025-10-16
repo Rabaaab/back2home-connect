@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowRight, Search, Sparkles, Users, Zap } from "lucide-react";
 import campusHero from "@/assets/campus-hero.png";
+import uemfLogo from "@/assets/uemf-logo.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -46,10 +47,9 @@ export default function Home() {
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
           <div className="max-w-3xl">
             <div className="space-y-8">
-              <div className="inline-block">
-                <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold backdrop-blur-sm">
-                  {t('home.hero.badge')}
-                </span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold backdrop-blur-sm">
+                <img src={uemfLogo} alt="UEMF" className="h-5 w-auto" />
+                <span>{t('home.hero.badge')}</span>
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-primary">
                 {t('home.hero.title')}
@@ -86,31 +86,31 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="space-y-3 group">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-transform duration-300">
-                <Sparkles className="w-10 h-10 text-white" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Sparkles className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 100%
               </h3>
-              <p className="text-foreground/70 font-medium text-lg">{t('home.stats.free')}</p>
+              <p className="text-foreground/70 dark:text-foreground/60 font-medium">{t('home.stats.free')}</p>
             </div>
             <div className="space-y-3 group">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary via-secondary to-primary flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-transform duration-300">
-                <Users className="w-10 h-10 text-white" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 {t('home.stats.community')}
               </h3>
-              <p className="text-foreground/70 font-medium text-lg">{t('home.stats.communityDesc')}</p>
+              <p className="text-foreground/70 dark:text-foreground/60 font-medium">{t('home.stats.communityDesc')}</p>
             </div>
             <div className="space-y-3 group">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent via-accent to-primary flex items-center justify-center mx-auto shadow-xl group-hover:scale-110 transition-transform duration-300">
-                <Zap className="w-10 h-10 text-white" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 {t('home.stats.easy')}
               </h3>
-              <p className="text-foreground/70 font-medium text-lg">{t('home.stats.easyDesc')}</p>
+              <p className="text-foreground/70 dark:text-foreground/60 font-medium">{t('home.stats.easyDesc')}</p>
             </div>
           </div>
         </div>

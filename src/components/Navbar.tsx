@@ -61,7 +61,9 @@ export const Navbar = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={back2meLogo} alt="Back2Me Logo" className="h-16 w-auto transition-transform group-hover:scale-105" />
+            <div className="bg-background dark:bg-card rounded-lg p-2">
+              <img src={back2meLogo} alt="Back2Me Logo" className="h-12 w-auto transition-transform group-hover:scale-105" />
+            </div>
           </Link>
 
           <div className="flex items-center gap-2">

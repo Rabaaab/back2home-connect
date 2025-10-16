@@ -8,11 +8,13 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-4 group">
-              <img 
-                src={back2meLogo} 
-                alt="Back2Me Logo" 
-                className="h-12 w-auto transition-transform group-hover:scale-105" 
-              />
+              <div className="bg-background dark:bg-card rounded-lg p-2 inline-block">
+                <img 
+                  src={back2meLogo} 
+                  alt="Back2Me Logo" 
+                  className="h-10 w-auto transition-transform group-hover:scale-105" 
+                />
+              </div>
             </Link>
             <p className="text-muted-foreground dark:text-muted-foreground max-w-md">
               La plateforme d'objets trouvés de l'UEMF. Retrouvez vos affaires perdues ou aidez quelqu'un à récupérer les siennes.

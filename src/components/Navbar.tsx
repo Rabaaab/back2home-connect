@@ -58,11 +58,11 @@ export const Navbar = () => {
 
   return (
     <nav className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-background dark:bg-card rounded-lg p-2">
-              <img src={back2meLogo} alt="Back2Me Logo" className="h-20 w-auto transition-transform group-hover:scale-105" />
+            <div className="bg-background dark:bg-card rounded-lg p-1.5">
+              <img src={back2meLogo} alt="Back2Me Logo" className="h-12 w-auto transition-transform group-hover:scale-105" />
             </div>
           </Link>
 

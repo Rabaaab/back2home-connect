@@ -12,7 +12,7 @@ export const Footer = () => {
                 <img 
                   src={back2meLogo} 
                   alt="Back2Me Logo" 
-                  className="h-14 w-auto transition-transform group-hover:scale-105" 
+                  className="h-16 w-auto transition-transform group-hover:scale-105" 
                 />
               </div>
             </Link>

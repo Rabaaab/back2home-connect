@@ -46,9 +46,9 @@ export default function Home() {
         
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
           <div className="max-w-3xl">
-            <div className="space-y-8">
-              <div className="inline-flex flex-col items-center gap-3 px-6 py-4 rounded-2xl bg-primary/10 text-primary font-semibold backdrop-blur-sm">
-                <img src={uemfLogo} alt="UEMF" className="h-12 w-auto" />
+            <div className="space-y-6">
+              <img src={uemfLogo} alt="UEMF" className="h-20 w-auto" />
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary/10 text-primary font-semibold backdrop-blur-sm">
                 <span className="text-base">{t('home.hero.badge')}</span>
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-primary">

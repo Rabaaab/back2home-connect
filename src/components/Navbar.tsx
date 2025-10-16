@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, User, LogOut, Package } from "lucide-react";
+import { Search, Plus, User, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import uemfLogo from "@/assets/uemf-logo.png";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -54,13 +55,14 @@ export const Navbar = () => {
     <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <Package className="w-6 h-6 text-white" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={uemfLogo} alt="UEMF Logo" className="h-12 w-auto transition-transform group-hover:scale-105" />
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground font-medium tracking-wide">Plateforme UEMF</span>
+              <span className="text-xl font-bold text-primary">
+                Back2Me
+              </span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Back2Me
-            </span>
           </Link>
 
           <div className="flex items-center gap-3">

@@ -21,6 +21,7 @@ export default function PostDetail() {
   const [user, setUser] = useState<any>(null);
   const [claimMessage, setClaimMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [claims, setClaims] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -37,6 +38,23 @@ export default function PostDetail() {
       .single();
     setPost(data);
     setLoading(false);
+    
+    // Fetch claims if user is the post owner
+    if (data) {
+      fetchClaims(data.user_id);
+    }
+  };
+
+  const fetchClaims = async (postOwnerId: string) => {
+    const session = await supabase.auth.getSession();
+    if (session.data.session?.user?.id === postOwnerId) {
+      const { data } = await supabase
+        .from("claims")
+        .select("*, profiles(full_name, avatar_url, email)")
+        .eq("post_id", id)
+        .order("created_at", { ascending: false });
+      setClaims(data || []);
+    }
   };
 
   const handleClaim = async () => {
@@ -63,6 +81,8 @@ export default function PostDetail() {
         description: "Le propriétaire a reçu votre demande.",
       });
       setClaimMessage("");
+      // Refresh claims
+      if (post) fetchClaims(post.user_id);
     }
   };
 
@@ -168,6 +188,40 @@ export default function PostDetail() {
               <Button onClick={handleClaim} className="btn-hero">
                 Envoyer la demande
               </Button>
+            </Card>
+          )}
+
+          {isOwner && claims.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                Réclamations reçues ({claims.length})
+              </h3>
+              <div className="space-y-4">
+                {claims.map((claim: any) => (
+                  <div key={claim.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={claim.profiles?.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                          {claim.profiles?.full_name?.[0] || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{claim.profiles?.full_name || "Utilisateur"}</p>
+                        <p className="text-sm text-muted-foreground">{claim.profiles?.email}</p>
+                      </div>
+                      <Badge variant={claim.status === "pending" ? "secondary" : "default"}>
+                        {claim.status === "pending" ? "En attente" : claim.status === "approved" ? "Approuvé" : "Rejeté"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm bg-muted p-3 rounded">{claim.message}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(claim.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </Card>
           )}
         </div>

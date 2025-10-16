@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, User, LogOut } from "lucide-react";
+import { Search, Plus, User, LogOut, Moon, Sun, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -8,12 +8,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import uemfLogo from "@/assets/uemf-logo.png";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import back2meLogo from "@/assets/back2me-logo.png";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
 
@@ -52,20 +57,44 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={uemfLogo} alt="UEMF Logo" className="h-12 w-auto transition-transform group-hover:scale-105" />
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground font-medium tracking-wide">Plateforme UEMF</span>
-              <span className="text-xl font-bold text-primary">
-                Back2Me
-              </span>
-            </div>
+            <img src={back2meLogo} alt="Back2Me Logo" className="h-16 w-auto transition-transform group-hover:scale-105" />
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-xl">
+                  <Languages className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLanguage('fr')}>
+                  🇫🇷 Français
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage('en')}>
+                  🇬🇧 English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage('ar')}>
+                  🇲🇦 العربية
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-xl"
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </Button>
+
             {user ? (
               <>
                 <Button
@@ -81,7 +110,7 @@ export const Navbar = () => {
                   className="rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
                 >
                   <Plus className="w-5 h-5 mr-2" />
-                  <span className="hidden sm:inline">Publier</span>
+                  <span className="hidden sm:inline">{t('nav.publish')}</span>
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -97,11 +126,12 @@ export const Navbar = () => {
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => navigate("/profile")}>
                       <User className="w-4 h-4 mr-2" />
-                      Mon Profil
+                      {t('nav.profile')}
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
-                      Déconnexion
+                      {t('nav.logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -113,13 +143,13 @@ export const Navbar = () => {
                   onClick={() => navigate("/auth")}
                   className="rounded-xl"
                 >
-                  Connexion
+                  {t('nav.login')}
                 </Button>
                 <Button
                   onClick={() => navigate("/auth?signup=true")}
                   className="rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
                 >
-                  S'inscrire
+                  {t('nav.signup')}
                 </Button>
               </>
             )}

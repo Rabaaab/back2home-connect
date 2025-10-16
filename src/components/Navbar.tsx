@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, User, LogOut, Moon, Sun, Languages } from "lucide-react";
+import { Search, Plus, User, LogOut, Moon, Sun, Languages, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -65,6 +65,17 @@ export const Navbar = () => {
           </Link>
 
           <div className="flex items-center gap-2">
+            {user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/notifications")}
+                className="rounded-xl relative"
+              >
+                <Bell className="w-5 h-5" />
+              </Button>
+            )}
+            
             {/* Language Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

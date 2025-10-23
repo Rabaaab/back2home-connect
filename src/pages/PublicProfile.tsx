@@ -161,7 +161,7 @@ export default function PublicProfile() {
         rated_user_id: userId,
         stars: ratingValue,
         comment: comment || null,
-        claim_id: "00000000-0000-0000-0000-000000000000", // Dummy UUID for direct profile ratings
+        claim_id: null, // NULL for direct profile ratings (not based on claims)
       });
 
     if (error) {

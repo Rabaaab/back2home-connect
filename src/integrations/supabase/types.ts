@@ -163,6 +163,58 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          claim_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rated_user_id: string
+          rater_user_id: string
+          stars: number
+        }
+        Insert: {
+          claim_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_user_id: string
+          rater_user_id: string
+          stars: number
+        }
+        Update: {
+          claim_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_user_id?: string
+          rater_user_id?: string
+          stars?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rated_user_id_fkey"
+            columns: ["rated_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rater_user_id_fkey"
+            columns: ["rater_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badges: {
         Row: {
           awarded_at: string

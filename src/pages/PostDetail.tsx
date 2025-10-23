@@ -12,6 +12,14 @@ import { Calendar, MapPin, User, Trash2, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StarRating } from "@/components/StarRating";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -22,6 +30,9 @@ export default function PostDetail() {
   const [claimMessage, setClaimMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [claims, setClaims] = useState<any[]>([]);
+  const [ratingDialog, setRatingDialog] = useState<{ open: boolean; claimId: string; userId: string } | null>(null);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [ownerRating, setOwnerRating] = useState({ average: 0, count: 0 });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,18 +53,74 @@ export default function PostDetail() {
     // Fetch claims if user is the post owner
     if (data) {
       fetchClaims(data.user_id);
+      // Fetch owner's rating
+      fetchOwnerRating(data.user_id);
+    }
+  };
+
+  const fetchOwnerRating = async (userId: string) => {
+    const { data: ratings } = await supabase
+      .from("ratings")
+      .select("stars")
+      .eq("rated_user_id", userId);
+
+    if (ratings && ratings.length > 0) {
+      const total = ratings.reduce((sum, r) => sum + r.stars, 0);
+      setOwnerRating({
+        average: total / ratings.length,
+        count: ratings.length
+      });
     }
   };
 
   const fetchClaims = async (postOwnerId: string) => {
     const session = await supabase.auth.getSession();
-    if (session.data.session?.user?.id === postOwnerId) {
+    const currentUserId = session.data.session?.user?.id;
+    
+    if (currentUserId === postOwnerId) {
+      // Owner view: see all claims
       const { data } = await supabase
         .from("claims")
-        .select("*, profiles(full_name, avatar_url, email)")
+        .select("*, profiles(full_name, avatar_url, email), ratings(*)")
         .eq("post_id", id)
         .order("created_at", { ascending: false });
       setClaims(data || []);
+    } else if (currentUserId) {
+      // Claimer view: see only their claims
+      const { data } = await supabase
+        .from("claims")
+        .select("*, profiles(full_name, avatar_url, email), ratings(*)")
+        .eq("post_id", id)
+        .eq("claimer_id", currentUserId)
+        .order("created_at", { ascending: false });
+      setClaims(data || []);
+    }
+  };
+  
+  const handleRateUser = async () => {
+    if (!ratingDialog || selectedRating === 0) return;
+
+    const { error } = await supabase.from("ratings").insert({
+      claim_id: ratingDialog.claimId,
+      rated_user_id: ratingDialog.userId,
+      rater_user_id: user?.id,
+      stars: selectedRating,
+    });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Évaluation envoyée",
+        description: "Merci pour votre feedback !",
+      });
+      setRatingDialog(null);
+      setSelectedRating(0);
+      if (post) fetchClaims(post.user_id);
     }
   };
 
@@ -188,9 +255,17 @@ export default function PostDetail() {
                     {post.profiles?.full_name?.[0] || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
+                <div className="flex-1">
                   <p className="font-medium">{post.profiles?.full_name || "Utilisateur"}</p>
                   <p className="text-sm text-muted-foreground">{post.profiles?.email}</p>
+                  {ownerRating.count > 0 && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <StarRating rating={ownerRating.average} size="sm" />
+                      <span className="text-xs text-muted-foreground">
+                        ({ownerRating.count} avis)
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -222,29 +297,55 @@ export default function PostDetail() {
                 Réclamations reçues ({claims.length})
               </h3>
               <div className="space-y-4">
-                {claims.map((claim: any) => (
-                  <div key={claim.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={claim.profiles?.avatar_url} />
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
-                          {claim.profiles?.full_name?.[0] || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium">{claim.profiles?.full_name || "Utilisateur"}</p>
-                        <p className="text-sm text-muted-foreground">{claim.profiles?.email}</p>
+                {claims.map((claim: any) => {
+                  const hasRated = claim.ratings && claim.ratings.length > 0;
+                  const canRate = !isOwner && user?.id === claim.claimer_id && !hasRated;
+                  
+                  return (
+                    <div key={claim.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={claim.profiles?.avatar_url} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                            {claim.profiles?.full_name?.[0] || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{claim.profiles?.full_name || "Utilisateur"}</p>
+                          <p className="text-sm text-muted-foreground">{claim.profiles?.email}</p>
+                        </div>
+                        <Badge variant={claim.status === "pending" ? "secondary" : "default"}>
+                          {claim.status === "pending" ? "En attente" : claim.status === "approved" ? "Approuvé" : "Rejeté"}
+                        </Badge>
                       </div>
-                      <Badge variant={claim.status === "pending" ? "secondary" : "default"}>
-                        {claim.status === "pending" ? "En attente" : claim.status === "approved" ? "Approuvé" : "Rejeté"}
-                      </Badge>
+                      <p className="text-sm bg-muted p-3 rounded">{claim.message}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(claim.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                        </p>
+                        {canRate && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setRatingDialog({ 
+                              open: true, 
+                              claimId: claim.id, 
+                              userId: post.user_id 
+                            })}
+                          >
+                            Évaluer le propriétaire
+                          </Button>
+                        )}
+                        {hasRated && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Votre évaluation:</span>
+                            <StarRating rating={claim.ratings[0].stars} size="sm" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm bg-muted p-3 rounded">{claim.message}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(claim.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           )}
@@ -252,6 +353,41 @@ export default function PostDetail() {
       </div>
 
       <Footer />
+      
+      {/* Rating Dialog */}
+      <Dialog open={ratingDialog?.open || false} onOpenChange={(open) => !open && setRatingDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Évaluer le propriétaire</DialogTitle>
+            <DialogDescription>
+              Comment s'est passée votre conversation avec le propriétaire ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm text-muted-foreground">Cliquez sur les étoiles pour évaluer</p>
+              <StarRating 
+                rating={selectedRating} 
+                size="lg" 
+                interactive 
+                onRatingChange={setSelectedRating}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setRatingDialog(null)}>
+                Annuler
+              </Button>
+              <Button 
+                className="flex-1 btn-hero" 
+                onClick={handleRateUser}
+                disabled={selectedRating === 0}
+              >
+                Envoyer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

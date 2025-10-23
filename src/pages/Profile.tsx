@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { StarRating } from "@/components/StarRating";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Loader2, Award } from "lucide-react";
+import { Camera, Loader2, Star } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -23,7 +23,8 @@ export default function Profile() {
     full_name: "",
     avatar_url: "",
   });
-  const [badges, setBadges] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   useEffect(() => {
     checkAuth();
@@ -53,14 +54,18 @@ export default function Profile() {
       });
     }
 
-    // Fetch user badges
-    const { data: userBadges } = await supabase
-      .from("user_badges")
-      .select("*, badges(*)")
-      .eq("user_id", userId)
-      .order("awarded_at", { ascending: false });
+    // Fetch user ratings
+    const { data: ratings } = await supabase
+      .from("ratings")
+      .select("stars")
+      .eq("rated_user_id", userId);
+
+    if (ratings && ratings.length > 0) {
+      const total = ratings.reduce((sum, r) => sum + r.stars, 0);
+      setAverageRating(total / ratings.length);
+      setTotalRatings(ratings.length);
+    }
     
-    setBadges(userBadges || []);
     setLoading(false);
   };
 
@@ -225,34 +230,46 @@ export default function Profile() {
             </Button>
           </div>
 
-          {/* Badges Section */}
-          {badges.length > 0 && (
-            <Card className="p-6 mt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Award className="w-6 h-6 text-primary" />
-                <h2 className="text-2xl font-bold">Mes Badges</h2>
+          {/* Rating Section */}
+          <Card className="p-6 mt-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+              <h2 className="text-2xl font-bold">Ma Réputation</h2>
+            </div>
+            
+            {totalRatings === 0 ? (
+              <div className="text-center py-12">
+                <Star className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">
+                  Aucune évaluation pour le moment
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Les utilisateurs pourront vous noter après avoir réclamé vos objets trouvés.
+                </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {badges.map((userBadge: any) => (
-                  <div 
-                    key={userBadge.id} 
-                    className="border rounded-lg p-4 bg-gradient-to-br from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-4xl">{userBadge.badges.icon}</span>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{userBadge.badges.name}</h3>
-                        <p className="text-sm text-muted-foreground">{userBadge.badges.description}</p>
-                        <Badge variant="outline" className="mt-2">
-                          Obtenu le {new Date(userBadge.awarded_at).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      </div>
-                    </div>
+            ) : (
+              <div className="flex flex-col items-center gap-6">
+                <div className="text-center">
+                  <div className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-3">
+                    {averageRating.toFixed(1)}
                   </div>
-                ))}
+                  <StarRating rating={averageRating} size="lg" showValue={false} />
+                  <p className="text-sm text-muted-foreground mt-3">
+                    Basé sur {totalRatings} évaluation{totalRatings > 1 ? 's' : ''}
+                  </p>
+                </div>
+                
+                <div className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg p-6 text-center">
+                  <p className="text-sm font-medium mb-1">
+                    Votre score de confiance
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Continuez à aider la communauté pour améliorer votre réputation !
+                  </p>
+                </div>
               </div>
-            </Card>
-          )}
+            )}
+          </Card>
         </div>
       </main>
 

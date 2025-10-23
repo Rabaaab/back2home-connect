@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import CreatePost from "./pages/CreatePost";
 import PostDetail from "./pages/PostDetail";
 import Profile from "./pages/Profile";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/create" element={<CreatePost />} />
               <Route path="/post/:id" element={<PostDetail />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

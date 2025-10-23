@@ -10,7 +10,12 @@ import { Package } from "lucide-react";
 import { z } from "zod";
 
 const authSchema = z.object({
-  email: z.string().email("Email invalide"),
+  email: z.string()
+    .email("Email invalide")
+    .refine(
+      (email) => email.endsWith("@etab.ueuromed.org"),
+      { message: "Email invalide. Utilisez votre email universitaire @etab.ueuromed.org" }
+    ),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").optional(),
 });

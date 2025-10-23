@@ -165,11 +165,20 @@ export default function PublicProfile() {
       });
 
     if (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer l'évaluation",
-        variant: "destructive",
-      });
+      // Handle duplicate rating error
+      if (error.code === '23505') {
+        toast({
+          title: "Erreur",
+          description: "Vous avez déjà évalué cet utilisateur",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible d'envoyer l'évaluation",
+          variant: "destructive",
+        });
+      }
       console.error(error);
     } else {
       toast({

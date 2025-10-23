@@ -1,0 +1,98 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+interface ClaimNotificationRequest {
+  ownerEmail: string;
+  ownerName: string;
+  claimerName: string;
+  claimerEmail: string;
+  postTitle: string;
+  message: string;
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { ownerEmail, ownerName, claimerName, claimerEmail, postTitle, message }: ClaimNotificationRequest = await req.json();
+
+    console.log("Sending claim notification email to:", ownerEmail);
+
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY not configured");
+    }
+
+    // Send email using Resend API directly
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Back2Me <onboarding@resend.dev>",
+        to: [ownerEmail],
+        subject: `Nouvelle réclamation pour "${postTitle}"`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">Nouvelle réclamation reçue 🔔</h1>
+            <p>Bonjour ${ownerName},</p>
+            <p>Vous avez reçu une nouvelle réclamation pour votre annonce <strong>"${postTitle}"</strong>.</p>
+            
+            <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0;">Détails du demandeur:</h3>
+              <p><strong>Nom:</strong> ${claimerName}</p>
+              <p><strong>Email:</strong> ${claimerEmail}</p>
+              
+              <h3>Message:</h3>
+              <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+            
+            <p>Vous pouvez répondre directement à cette personne à l'adresse: <strong>${claimerEmail}</strong></p>
+            
+            <p style="margin-top: 30px; color: #666; font-size: 14px;">
+              Cordialement,<br>
+              L'équipe Back2Me
+            </p>
+          </div>
+        `,
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.json();
+      console.error("Resend API error:", errorData);
+      throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
+    }
+
+    const emailData = await emailResponse.json();
+    console.log("Email sent successfully:", emailData);
+
+    return new Response(JSON.stringify(emailData), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error in send-claim-notification function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
+  }
+};
+
+serve(handler);

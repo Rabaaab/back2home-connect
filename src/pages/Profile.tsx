@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Award } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export default function Profile() {
     full_name: "",
     avatar_url: "",
   });
+  const [badges, setBadges] = useState<any[]>([]);
 
   useEffect(() => {
     checkAuth();
@@ -49,6 +52,15 @@ export default function Profile() {
         avatar_url: data.avatar_url || "",
       });
     }
+
+    // Fetch user badges
+    const { data: userBadges } = await supabase
+      .from("user_badges")
+      .select("*, badges(*)")
+      .eq("user_id", userId)
+      .order("awarded_at", { ascending: false });
+    
+    setBadges(userBadges || []);
     setLoading(false);
   };
 
@@ -212,6 +224,35 @@ export default function Profile() {
               )}
             </Button>
           </div>
+
+          {/* Badges Section */}
+          {badges.length > 0 && (
+            <Card className="p-6 mt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Award className="w-6 h-6 text-primary" />
+                <h2 className="text-2xl font-bold">Mes Badges</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {badges.map((userBadge: any) => (
+                  <div 
+                    key={userBadge.id} 
+                    className="border rounded-lg p-4 bg-gradient-to-br from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-4xl">{userBadge.badges.icon}</span>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">{userBadge.badges.name}</h3>
+                        <p className="text-sm text-muted-foreground">{userBadge.badges.description}</p>
+                        <Badge variant="outline" className="mt-2">
+                          Obtenu le {new Date(userBadge.awarded_at).toLocaleDateString('fr-FR')}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
       </main>
 

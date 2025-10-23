@@ -63,6 +63,13 @@ export default function PostDetail() {
       return;
     }
 
+    // Get current user profile
+    const { data: claimerProfile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", user.id)
+      .single();
+
     const { error } = await supabase.from("claims").insert([{
       post_id: id,
       claimer_id: user.id,
@@ -76,9 +83,26 @@ export default function PostDetail() {
         description: error.message,
       });
     } else {
+      // Send email notification to post owner
+      try {
+        await supabase.functions.invoke('send-claim-notification', {
+          body: {
+            ownerEmail: post.profiles.email,
+            ownerName: post.profiles.full_name || "Utilisateur",
+            claimerName: claimerProfile?.full_name || "Utilisateur",
+            claimerEmail: claimerProfile?.email || user.email,
+            postTitle: post.title,
+            message: claimMessage,
+          },
+        });
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't show error to user, claim was still created
+      }
+
       toast({
         title: "Demande envoyée!",
-        description: "Le propriétaire a reçu votre demande.",
+        description: "Le propriétaire a reçu votre demande par email.",
       });
       setClaimMessage("");
       // Refresh claims

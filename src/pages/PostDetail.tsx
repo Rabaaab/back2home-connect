@@ -277,7 +277,10 @@ export default function PostDetail() {
                 )}
               </div>
 
-              <div className="flex items-center gap-3 pt-4 border-t">
+              <div 
+                className="flex items-center gap-3 pt-4 border-t cursor-pointer hover:bg-accent/50 -mx-6 px-6 py-4 transition-colors" 
+                onClick={() => navigate(`/profile/${post.user_id}`)}
+              >
                 <Avatar>
                   <AvatarImage src={post.profiles?.avatar_url} />
                   <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">

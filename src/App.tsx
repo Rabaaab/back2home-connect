@@ -13,6 +13,7 @@ import CreatePost from "./pages/CreatePost";
 import PostDetail from "./pages/PostDetail";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
+import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +32,10 @@ const App = () => (
               <Route path="/search" element={<Search />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/post/:id" element={<PostDetail />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="*" element={<NotFound />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<PublicProfile />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

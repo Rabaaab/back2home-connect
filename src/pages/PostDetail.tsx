@@ -277,28 +277,43 @@ export default function PostDetail() {
                 )}
               </div>
 
-              <div 
-                className="flex items-center gap-3 pt-4 border-t cursor-pointer hover:bg-accent/50 -mx-6 px-6 py-4 transition-colors" 
-                onClick={() => navigate(`/profile/${post.user_id}`)}
-              >
-                <Avatar>
-                  <AvatarImage src={post.profiles?.avatar_url} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
-                    {post.profiles?.full_name?.[0] || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium">{post.profiles?.full_name || "Utilisateur"}</p>
-                  <p className="text-sm text-muted-foreground">{post.profiles?.email}</p>
-                  {ownerRating.count > 0 && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <StarRating rating={ownerRating.average} size="sm" />
-                      <span className="text-xs text-muted-foreground">
-                        ({ownerRating.count} avis)
-                      </span>
-                    </div>
-                  )}
+              <div className="pt-4 border-t space-y-3">
+                <h3 className="font-semibold text-sm text-muted-foreground">Informations de contact</h3>
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:bg-accent/50 p-3 rounded-lg transition-colors" 
+                  onClick={() => navigate(`/profile/${post.user_id}`)}
+                >
+                  <Avatar>
+                    <AvatarImage src={post.profiles?.avatar_url} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                      {post.profiles?.full_name?.[0] || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{post.profiles?.full_name || "Utilisateur"}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      {post.profiles?.email}
+                    </p>
+                    {ownerRating.count > 0 && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <StarRating rating={ownerRating.average} size="sm" />
+                        <span className="text-xs text-muted-foreground">
+                          ({ownerRating.count} avis)
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {!isOwner && (
+                  <a 
+                    href={`mailto:${post.profiles?.email}?subject=À propos de: ${post.title}`}
+                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Contacter par email
+                  </a>
+                )}
               </div>
             </div>
           </Card>

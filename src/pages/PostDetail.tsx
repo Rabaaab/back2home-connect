@@ -305,15 +305,21 @@ export default function PostDetail() {
                     )}
                   </div>
                 </div>
-                {!isOwner && (
-                  <a 
-                    href={`mailto:${post.profiles?.email}?subject=À propos de: ${post.title}`}
-                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Contacter par email
-                  </a>
-                )}
+              {!isOwner && (
+                <button
+                  onClick={() => {
+                    const email = post.profiles?.email;
+                    const subject = encodeURIComponent(`À propos de: ${post.title}`);
+                    
+                    // Ouvrir Gmail web directement
+                    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}`, '_blank');
+                  }}
+                  className="inline-flex items-center gap-2 text-sm text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Contacter par email
+                </button>
+              )}
               </div>
             </div>
           </Card>

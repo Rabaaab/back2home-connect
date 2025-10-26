@@ -165,7 +165,7 @@ export type Database = {
       }
       ratings: {
         Row: {
-          claim_id: string
+          claim_id: string | null
           comment: string | null
           created_at: string
           id: string
@@ -174,7 +174,7 @@ export type Database = {
           stars: number
         }
         Insert: {
-          claim_id: string
+          claim_id?: string | null
           comment?: string | null
           created_at?: string
           id?: string
@@ -183,7 +183,7 @@ export type Database = {
           stars: number
         }
         Update: {
-          claim_id?: string
+          claim_id?: string | null
           comment?: string | null
           created_at?: string
           id?: string

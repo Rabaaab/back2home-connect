@@ -6,8 +6,11 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, Calendar as CalendarIcon, X } from "lucide-react";
+import { format } from "date-fns";
 
 export default function Search() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -15,6 +18,8 @@ export default function Search() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +28,7 @@ export default function Search() {
 
   useEffect(() => {
     filterPosts();
-  }, [posts, selectedCategory, selectedType, searchQuery]);
+  }, [posts, selectedCategory, selectedType, searchQuery, startDate, endDate]);
 
   const fetchPosts = async () => {
     const { data } = await supabase
@@ -54,7 +59,26 @@ export default function Search() {
       );
     }
 
+    if (startDate) {
+      filtered = filtered.filter((post) => {
+        const postDate = new Date(post.date_occurred);
+        return postDate >= startDate;
+      });
+    }
+
+    if (endDate) {
+      filtered = filtered.filter((post) => {
+        const postDate = new Date(post.date_occurred);
+        return postDate <= endDate;
+      });
+    }
+
     setFilteredPosts(filtered);
+  };
+
+  const clearDateFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   return (
@@ -96,6 +120,64 @@ export default function Search() {
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Filtrer par date</h3>
+              {(startDate || endDate) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearDateFilters}
+                  className="h-8"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Effacer
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="justify-start text-left font-normal rounded-xl"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "dd/MM/yyyy") : "Date début"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="justify-start text-left font-normal rounded-xl"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "dd/MM/yyyy") : "Date fin"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </div>
 

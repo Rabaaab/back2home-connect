@@ -359,7 +359,12 @@ export default function PostDetail() {
                         </Avatar>
                         <div className="flex-1">
                           <p className="font-medium">{claim.profiles?.full_name || "Utilisateur"}</p>
-                          <p className="text-sm text-muted-foreground">{claim.profiles?.email}</p>
+                          <a 
+                            href={`mailto:${claim.profiles?.email}?subject=À propos de votre demande: ${post.title}`}
+                            className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+                          >
+                            {claim.profiles?.email}
+                          </a>
                         </div>
                         <Badge variant={claim.status === "pending" ? "secondary" : "default"}>
                           {claim.status === "pending" ? "En attente" : claim.status === "approved" ? "Approuvé" : "Rejeté"}

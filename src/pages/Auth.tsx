@@ -89,10 +89,14 @@ export default function Auth() {
         navigate("/");
       }
     } catch (error: any) {
+      const errorMessage = !isSignUp && (error.message?.includes('Invalid') || error.message?.includes('Email') || error.message?.includes('Password'))
+        ? "Email ou mot de passe incorrect"
+        : error.message || "Une erreur est survenue.";
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue.",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
